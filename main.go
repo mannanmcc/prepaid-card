@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	db, err := models.NewDB("user:password@tcp(192.168.33.10:3306)/prepaid-card")
+	db, err := models.NewDB("user:password@tcp(192.168.33.10:3306)/prepaid-card?charset=utf8&parseTime=True")
 	if err != nil {
 		panic(err)
 	}

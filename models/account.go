@@ -32,6 +32,14 @@ func (a *NotEnoughMoneyToPayError) Error() string {
 	return fmt.Sprintf("account number does not have enough money to pay")
 }
 
+type RefundAmountCannotBeMoreThanCapturedAmountError struct {
+	amount float64
+}
+
+func (a *RefundAmountCannotBeMoreThanCapturedAmountError) Error() string {
+	return fmt.Sprintf("Oops, can not refund this amount")
+}
+
 //Topup - add amount with exisiting amount in the account
 func (a *Account) Topup(amount float64) {
 	a.Balance = a.Balance + amount
@@ -40,9 +48,22 @@ func (a *Account) Topup(amount float64) {
 //AuthoriseAmount - return the transaction amount against account balance
 func (a *Account) AuthoriseAmount(amount float64) (bool, error) {
 	if amount > a.Balance {
-		return false, &NotEnoughMoneyToPayError{}
+		return false, &CannotBlockMoreThanCurrentBalance{}
 	}
 
-	//add a transaction against this account
+	a.Balance = a.Balance - amount
 	return true, nil
+}
+
+//Refund - return the transaction amount against account balance
+func (a *Account) Refund(transaction *Transaction, amount float64) error {
+	if amount > transaction.Amount {
+		return &RefundAmountCannotBeMoreThanCapturedAmountError{}
+	}
+
+	transaction.ReFund(amount)
+	//topup the refunded amount
+	a.Topup(amount)
+
+	return nil
 }

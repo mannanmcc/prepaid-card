@@ -17,24 +17,24 @@ type AccountRepository struct {
 }
 
 //FindByAccountNumber - returns account
-func (repo *AccountRepository) FindByAccountNumber(accountNumber int) (Account, error) {
+func (repo *AccountRepository) FindByAccountNumber(accountNumber int) (*Account, error) {
 	var account Account
 	res := repo.Db.Find(&account, &Account{AccountNumber: accountNumber})
 
 	if res.RecordNotFound() {
-		return account, errors.New(fmt.Sprintf("account not found with account number : %d", accountNumber))
+		return &account, errors.New(fmt.Sprintf("account not found with account number : %d", accountNumber))
 	}
 
-	return account, nil
+	return &account, nil
 }
 
 //UpdateAccount - updates the account
-func (repo *AccountRepository) UpdateAccount(account Account) (Account, error) {
+func (repo *AccountRepository) UpdateAccount(account *Account) error {
 	id := repo.Db.Save(&account)
 
 	if id == nil {
-		return account, errors.New("account saving failed")
+		return errors.New("account saving failed")
 	}
 
-	return account, nil
+	return nil
 }

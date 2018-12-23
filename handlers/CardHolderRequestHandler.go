@@ -1,22 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/mannanmcc/prepaid-card/models"
 )
-
-// //JSONResponse builds up the response object and encode
-// func JSONResponse(status string, msg string, w http.ResponseWriter) {
-// 	response := Response{
-// 		Status:  status,
-// 		Message: msg,
-// 	}
-
-// 	json.NewEncoder(w).Encode(response)
-// }
 
 // AddNewCompany - handle add new company request
 func (env Env) TopupCard(w http.ResponseWriter, r *http.Request) {
@@ -32,12 +21,8 @@ func (env Env) TopupCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("toping up ", topupAmount)
-	fmt.Printf("%+v\n", account)
-
 	account.Topup(topupAmount)
-	fmt.Printf("%+v\n", account)
-	_, err = accountRepo.UpdateAccount(account)
+	err = accountRepo.UpdateAccount(account)
 	if err != nil {
 		JSONResponse("FAILED", err.Error(), w)
 		return
