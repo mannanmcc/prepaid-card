@@ -1,6 +1,9 @@
 package models
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 //todo - add following later on startDate
 type Account struct {
@@ -40,6 +43,15 @@ func (a *RefundAmountCannotBeMoreThanCapturedAmountError) Error() string {
 	return fmt.Sprintf("Oops, can not refund this amount")
 }
 
+//ReverseAmountCannotBeMoreThanCapturedAmountError - reverse the authorise amount
+type ReverseAmountCannotBeMoreThanCapturedAmountError struct {
+	amount float64
+}
+
+func (a *ReverseAmountCannotBeMoreThanCapturedAmountError) Error() string {
+	return fmt.Sprintf("Oops, can not reverse this amount")
+}
+
 //Topup - add amount with exisiting amount in the account
 func (a *Account) Topup(amount float64) {
 	a.Balance = a.Balance + amount
@@ -62,6 +74,21 @@ func (a *Account) Refund(transaction *Transaction, amount float64) error {
 	}
 
 	transaction.ReFund(amount)
+	//topup the refunded amount
+	a.Topup(amount)
+
+	return nil
+}
+
+//ReverseCapture - return the transaction amount against account balance
+func (a *Account) Reverse(transaction *BlockedTransaction, amount float64) error {
+	if amount > transaction.Amount {
+		return &ReverseAmountCannotBeMoreThanCapturedAmountError{}
+	}
+
+	if err := transaction.Reverse(amount); err != nil {
+		return errors.New("oops, transaction can not be reverse")
+	}
 	//topup the refunded amount
 	a.Topup(amount)
 

@@ -10,7 +10,7 @@ func NewRouter(env handlers.Env) *mux.Router {
 	r := mux.NewRouter()
 
 	/*todo - all method name should be start with uppercase or lowercase*/
-	r.HandleFunc("/merchant/chargeauthorise", env.AuthoriseToCharge).Methods("POST")
+	r.HandleFunc("/merchant/charge-authorise", env.AuthoriseToCharge).Methods("POST")
 	r.HandleFunc("/merchant/capture-money", env.CaptureMoney).Methods("POST")
 	r.HandleFunc("/merchant/reverse-capture", env.ReverseCapture).Methods("POST")
 	r.HandleFunc("/merchant/refund", env.Refund).Methods("POST")

@@ -8,6 +8,7 @@ import (
 
 const STATUS_BLOCKED = "BLOCKED"
 const STATUS_CAPTURED = "CAPTURED"
+const STATUS_REVERSED = "REVERSED"
 
 //todo - add following later on startDate
 type BlockedTransaction struct {
@@ -51,6 +52,23 @@ func (bt *BlockedTransaction) CaptureFund(amount float64) error {
 	//Changed status to captured if capturing full amount
 	if bt.Amount == amount {
 		bt.Status = STATUS_CAPTURED
+	}
+
+	return nil
+}
+
+//Reverse - check capture with blocked amount and decrease the blocked if success
+func (bt *BlockedTransaction) Reverse(amount float64) error {
+	if bt.Amount < amount {
+		return errors.New("Cannot capture amount which is more than captured amount")
+	}
+
+	fmt.Printf("Cannot capture amount which is more than captured amount 1")
+	bt.Amount = bt.Amount - amount
+	//Changed status to captured if capturing full amount
+	if bt.Amount == amount {
+		fmt.Printf("Cannot capture amount which is more than captured amount 2")
+		bt.Status = STATUS_REVERSED
 	}
 
 	return nil

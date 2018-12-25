@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -97,6 +98,36 @@ func (env Env) CaptureMoney(w http.ResponseWriter, r *http.Request) {
 
 // ReverseCapture - reverse the transaction and the amount can not be charge to the again
 func (env Env) ReverseCapture(w http.ResponseWriter, r *http.Request) {
+	transactionID := r.FormValue("transactionId")
+	amount, _ := strconv.ParseFloat(r.FormValue("amount"), 64)
+	transactionRepo := models.BlockedTransactionRepository{Db: env.Db}
+	transaction, err := transactionRepo.FindByTransactionID(transactionID)
+	if err != nil {
+		JSONResponse("FAILED", err.Error(), w)
+		return
+	}
+
+	accountRepo := models.AccountRepository{Db: env.Db}
+	account, err := accountRepo.FindByAccountNumber(transaction.AccountNumber)
+	if err != nil {
+		JSONResponse("FAILED", err.Error(), w)
+		return
+	}
+
+	fmt.Println("account-> reverse")
+
+	if err = account.Reverse(transaction, amount); err != nil {
+		JSONResponse("FAILED", err.Error(), w)
+		return
+	}
+
+	if err := accountRepo.UpdateAccount(account); err != nil {
+		JSONResponse("FAILED", err.Error(), w)
+		return
+	}
+
+	fmt.Println("update acc::")
+	err = transactionRepo.Update(transaction)
 	JSONResponse("SUCCESS", "The transaction with ref XXXXX is reversed and can not be charge back to the card", w)
 }
 
