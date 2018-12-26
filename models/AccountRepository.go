@@ -10,7 +10,7 @@ import (
 //AccountRepositoryInterface - repository interface for account
 type AccountRepositoryInterface interface {
 	FindByCardNumber(cardNumber string) (*Account, error)
-	UpdateAccount(account *Account) error
+	Update(account *Account) error
 }
 
 //AccountRepository - type for account repository
@@ -30,8 +30,8 @@ func (repo *AccountRepository) FindByCardNumber(cardNumber string) (*Account, er
 	return &account, nil
 }
 
-//UpdateAccount - updates the account
-func (repo *AccountRepository) UpdateAccount(account *Account) error {
+//Update - updates the account
+func (repo *AccountRepository) Update(account *Account) error {
 	id := repo.Db.Save(&account)
 
 	if id == nil {

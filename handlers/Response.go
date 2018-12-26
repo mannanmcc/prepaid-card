@@ -39,7 +39,7 @@ func JSONResponse(status string, msg string, w http.ResponseWriter) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func HandleFAILEDResponse(msg string, w http.ResponseWriter) {
+func HandleFailedResponse(msg string, w http.ResponseWriter) {
 	response := Response{
 		Status:  "FAILED",
 		Message: msg,

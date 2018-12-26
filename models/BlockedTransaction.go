@@ -57,16 +57,16 @@ func (bt *BlockedTransaction) CaptureFund(amount float64) error {
 
 //Reverse - check capture with blocked amount and decrease the blocked if success
 func (bt *BlockedTransaction) Reverse(amount float64) error {
-	if bt.Amount < amount {
+	if bt.Balance < amount {
 		return errors.New("Cannot capture amount which is more than captured amount")
 	}
 
-	bt.Balance = bt.Balance - amount
 	//Changed status to captured if capturing full amount
-	if bt.Amount == amount {
-		fmt.Printf("Cannot capture amount which is more than captured amount 2")
-		bt.Status = STATUS_REVERSED
+	if bt.Balance == amount {
+		bt.Status = STATUS_CAPTURED
 	}
+
+	bt.Balance = bt.Balance - amount
 
 	return nil
 }

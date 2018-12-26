@@ -42,9 +42,9 @@ func (repo *TransactionRepository) FindByTransactionID(transationID string) (*Tr
 
 //Update - update the blocked transaction
 func (repo *TransactionRepository) Update(transaction *Transaction) error {
-	id := repo.Db.Save(&transaction)
-	if id != nil {
-		return errors.New("block transaction saving failed")
+	id := repo.Db.Save(transaction)
+	if id == nil {
+		return errors.New("Oops, could not update transaction")
 	}
 
 	return nil

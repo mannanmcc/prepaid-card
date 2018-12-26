@@ -19,7 +19,7 @@ type Transaction struct {
 	CapturedAt           time.Time
 }
 
-const STATUS_REFUNDED = "STATUS_REFUNDED"
+const statusRefund = "REFUND"
 
 //TableName - db table name
 func (transaction *Transaction) TableName() string {
@@ -33,7 +33,7 @@ func (transaction *Transaction) Refund(amount float64) error {
 	}
 
 	if transaction.Balance == amount {
-		transaction.Status = STATUS_REFUNDED
+		transaction.Status = statusRefund
 	}
 
 	transaction.Balance = transaction.Balance - amount

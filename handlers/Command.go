@@ -15,14 +15,15 @@ type CommandInterface interface {
 
 type Command struct{}
 
-func (c *Command) AuthorisationCommand(merchantID string, cardNumber string, amount float64, reason string, db *gorm.DB) error {
+//AuthorisationCommand - authorise the payment
+func (c *Command) AuthorisationCommand(authReq authorisationRequestBody, db *gorm.DB) error {
 	accountRepo := models.AccountRepository{Db: db}
-	account, err := accountRepo.FindByCardNumber(cardNumber)
+	account, err := accountRepo.FindByCardNumber(authReq.cardNumber)
 	if err != nil {
 		return err
 	}
 
-	_, err = account.AuthoriseAmount(amount)
+	_, err = account.AuthoriseAmount(authReq.amount)
 	if err != nil {
 		return err
 	}
@@ -31,10 +32,10 @@ func (c *Command) AuthorisationCommand(merchantID string, cardNumber string, amo
 	blockTransaction := models.BlockedTransaction{
 		TransactionID: transactionID,
 		CardNumber:    account.CardNumber,
-		Amount:        amount,
-		Balance:       amount,
-		MerchantID:    merchantID,
-		Reason:        reason,
+		Amount:        authReq.amount,
+		Balance:       authReq.amount,
+		MerchantID:    authReq.merchantId,
+		Reason:        authReq.reason,
 		BlockedAt:     time.Now(),
 		Status:        models.STATUS_BLOCKED,
 	}
@@ -44,16 +45,17 @@ func (c *Command) AuthorisationCommand(merchantID string, cardNumber string, amo
 		return err
 	}
 
-	if err := accountRepo.UpdateAccount(account); err != nil {
+	if err := accountRepo.Update(account); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c *Command) ReverseCommand(transactionID string, amount float64, db *gorm.DB) error {
+//ReverseCommand - reverse the capture
+func (c *Command) ReverseCommand(transactionReq *TransactionRequest, db *gorm.DB) error {
 	transactionRepo := models.BlockedTransactionRepository{Db: db}
-	transaction, err := transactionRepo.FindByTransactionID(transactionID)
+	transaction, err := transactionRepo.FindByTransactionID(transactionReq.transactionId)
 	if err != nil {
 		return err
 	}
@@ -64,13 +66,13 @@ func (c *Command) ReverseCommand(transactionID string, amount float64, db *gorm.
 		return err
 	}
 
-	if err = transaction.Reverse(amount); err != nil {
+	if err = transaction.Reverse(transactionReq.amount); err != nil {
 		return err
 	}
 
-	account.Topup(amount)
+	account.Topup(transactionReq.amount)
 
-	if err := accountRepo.UpdateAccount(account); err != nil {
+	if err := accountRepo.Update(account); err != nil {
 		return err
 	}
 

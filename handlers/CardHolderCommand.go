@@ -16,13 +16,13 @@ type CardHolderCommandInterface interface {
 type CardHolderCommand struct{}
 
 //Toptup - toptup the card
-func (command *CardHolderCommand) Toptup(cardNumber string, amount float64, db *gorm.DB) error {
-	if amount < 0 {
+func (command *CardHolderCommand) Toptup(topupRequest *TopupRequest, db *gorm.DB) error {
+	if topupRequest.amount < 0 {
 		return errors.New("Negative number can not used for topup")
 	}
 
 	accountRepo := models.AccountRepository{Db: db}
-	account, err := accountRepo.FindByCardNumber(cardNumber)
+	account, err := accountRepo.FindByCardNumber(topupRequest.cardNumber)
 	if err != nil {
 		return err
 	}
@@ -31,8 +31,8 @@ func (command *CardHolderCommand) Toptup(cardNumber string, amount float64, db *
 		return errors.New("The account is inactive")
 	}
 
-	account.Topup(amount)
-	if err := accountRepo.UpdateAccount(account); err != nil {
+	account.Topup(topupRequest.amount)
+	if err := accountRepo.Update(account); err != nil {
 		return err
 	}
 

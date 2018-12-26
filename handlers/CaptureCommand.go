@@ -16,29 +16,28 @@ type CapturedCommandInterface interface {
 type CaptureCommand struct{}
 
 //CaptureFund - capture blocked
-func (c *CaptureCommand) CaptureFund(transactionID string, amount float64, db *gorm.DB) error {
+func (c *CaptureCommand) CaptureFund(transactionReq *TransactionRequest, db *gorm.DB) error {
 	blockTransactionRepo := models.BlockedTransactionRepository{Db: db}
-	//find the original blocked transaction
-	blockedTransaction, err := blockTransactionRepo.FindByTransactionID(transactionID)
+	blockedTransaction, err := blockTransactionRepo.FindByTransactionID(transactionReq.transactionId)
 	if err != nil {
 		return err
 	}
 
 	//capture the fund which was blocked to be captured and remove balance to make sure it can not be captured again for the same amount
-	if err := blockedTransaction.CaptureFund(amount); err != nil {
+	if err := blockedTransaction.CaptureFund(transactionReq.amount); err != nil {
 		return err
 	}
 
-	transactionID = models.GenerateTransactionId(RANDOM_KEY_LENGTH)
+	transactionID := models.GenerateTransactionId(RANDOM_KEY_LENGTH)
 	transactionRepo := models.TransactionRepository{Db: db}
-
 	//create a transaction based on blocked transaction
 	transaction := models.Transaction{
 		CardNumber:           blockedTransaction.CardNumber,
 		TransactionID:        transactionID,
 		BlockedTransactionID: blockedTransaction.TransactionID,
 		MerchantID:           blockedTransaction.MerchantID,
-		Amount:               amount,
+		Amount:               transactionReq.amount,
+		Balance:              transactionReq.amount,
 		Status:               models.STATUS_CAPTURED,
 		CapturedAt:           time.Now(),
 	}
@@ -55,9 +54,9 @@ func (c *CaptureCommand) CaptureFund(transactionID string, amount float64, db *g
 }
 
 //Refund - refund the captured fund
-func (c *CaptureCommand) Refund(transactionID string, amount float64, db *gorm.DB) error {
+func (c *CaptureCommand) Refund(refundReq *TransactionRequest, db *gorm.DB) error {
 	transactionRepo := models.TransactionRepository{Db: db}
-	transaction, err := transactionRepo.FindByTransactionID(transactionID)
+	transaction, err := transactionRepo.FindByTransactionID(refundReq.transactionId)
 	if err != nil {
 		return err
 	}
@@ -68,14 +67,14 @@ func (c *CaptureCommand) Refund(transactionID string, amount float64, db *gorm.D
 		return err
 	}
 
-	if err = transaction.Refund(amount); err != nil {
+	if err = transaction.Refund(refundReq.amount); err != nil {
 		return err
 	}
 
-	account.Topup(amount)
+	account.Topup(refundReq.amount)
 
 	//update the account
-	if err := accountRepo.UpdateAccount(account); err != nil {
+	if err := accountRepo.Update(account); err != nil {
 		return err
 	}
 

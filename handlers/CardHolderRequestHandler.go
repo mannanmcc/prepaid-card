@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/mannanmcc/prepaid-card/models"
@@ -30,23 +29,26 @@ type RecentTopup struct {
 
 // TopupCard - handle add new company request
 func (env Env) TopupCard(w http.ResponseWriter, r *http.Request) {
-	cardNumber := r.FormValue("cardNumber")
-	topupAmount, _ := strconv.ParseFloat(r.FormValue("amount"), 64)
+	topupRequest := &TopupRequest{}
+	if err := topupRequest.Validate(r); err != nil {
+		HandleFailedResponse(err.Error(), w)
+		return
+	}
 	command := CardHolderCommand{}
-	if err := command.Toptup(cardNumber, topupAmount, env.Db); err != nil {
-		JSONResponse("FAILED", err.Error(), w)
+	if err := command.Toptup(topupRequest, env.Db); err != nil {
+		HandleFailedResponse(err.Error(), w)
 		return
 	}
 
 	topup := &models.Topup{
-		Amount:     topupAmount,
-		CardNumber: cardNumber,
+		Amount:     topupRequest.amount,
+		CardNumber: topupRequest.cardNumber,
 		TopupAt:    time.Now(),
 	}
 
 	topupRepo := models.TopupRepository{Db: env.Db}
 	if err := topupRepo.Store(topup); err != nil {
-		JSONResponse("FAILED", err.Error(), w)
+		HandleFailedResponse(err.Error(), w)
 		return
 	}
 
@@ -59,7 +61,7 @@ func (env Env) CheckBalanceAndLoadedAmount(w http.ResponseWriter, r *http.Reques
 	accountRepo := models.AccountRepository{Db: env.Db}
 	account, err := accountRepo.FindByCardNumber(cardNumber)
 	if err != nil {
-		HandleFAILEDResponse(err.Error(), w)
+		HandleFailedResponse(err.Error(), w)
 	}
 
 	blockedTransRepo := models.BlockedTransactionRepository{Db: env.Db}
@@ -95,10 +97,4 @@ func (env Env) CheckBalanceAndLoadedAmount(w http.ResponseWriter, r *http.Reques
 	}
 
 	json.NewEncoder(w).Encode(accountDetails)
-	//	JSONResponse("SUCCESS", "Your current balance is", w)
-}
-
-// ReservedAmount - handle add new company request
-func (env Env) ReservedAmount(w http.ResponseWriter, r *http.Request) {
-	JSONResponse("SUCCESS", "The money is reserved for the following transaction", w)
 }
