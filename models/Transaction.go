@@ -2,41 +2,40 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 
-//todo - add following later on startDate
+//Transaction - represent the transaction which is captured from reserved
 type Transaction struct {
 	ID                   int
-	AccountNumber        int
+	CardNumber           string
 	BlockedTransactionID string
+	TransactionID        string
+	ParentTransactionID  string
 	MerchantID           string
 	Amount               float64
+	Balance              float64
 	Status               string
-	TransactionID        string
 	CapturedAt           time.Time
 }
 
 const STATUS_REFUNDED = "STATUS_REFUNDED"
 
-func (bt *Transaction) TableName() string {
+//TableName - db table name
+func (transaction *Transaction) TableName() string {
 	return "transactions"
 }
 
-//Capture - check capture with blocked amount and decrease the blocked if success
-func (transaction *Transaction) ReFund(amount float64) error {
-	if transaction.Amount < amount {
-		return errors.New("Cannot capture amount which is more than captured amount")
+//Refund - check capture with blocked amount and decrease the blocked if success
+func (transaction *Transaction) Refund(amount float64) error {
+	if transaction.Balance < amount {
+		return errors.New("Cannot refund amount which is more than captured amount")
 	}
 
-	fmt.Printf("Cannot capture amount which is more than captured amount 1")
-	transaction.Amount = transaction.Amount - amount
-	//Changed status to captured if capturing full amount
-	if transaction.Amount == amount {
-		fmt.Printf("Cannot capture amount which is more than captured amount 2")
+	if transaction.Balance == amount {
 		transaction.Status = STATUS_REFUNDED
 	}
 
+	transaction.Balance = transaction.Balance - amount
 	return nil
 }

@@ -10,7 +10,7 @@ type Account struct {
 	ID                int
 	Balance           float64
 	AccountHolderName string
-	AccountNumber     int
+	CardNumber        string
 	SortCode          string
 	Status            string
 }
@@ -20,11 +20,11 @@ func (account *Account) TableName() string {
 }
 
 type AccountNotExists struct {
-	AccountNumber int
+	CardNumber int
 }
 
 func (a *AccountNotExists) Error() string {
-	return fmt.Sprintf("account number '%d' not exists", a.AccountNumber)
+	return fmt.Sprintf("account number '%d' not exists", a.CardNumber)
 }
 
 type NotEnoughMoneyToPayError struct {
@@ -73,22 +73,19 @@ func (a *Account) Refund(transaction *Transaction, amount float64) error {
 		return &RefundAmountCannotBeMoreThanCapturedAmountError{}
 	}
 
-	transaction.ReFund(amount)
+	transaction.Refund(amount)
 	//topup the refunded amount
 	a.Topup(amount)
 
 	return nil
 }
 
-//ReverseCapture - return the transaction amount against account balance
-func (a *Account) Reverse(transaction *BlockedTransaction, amount float64) error {
-	if amount > transaction.Amount {
-		return &ReverseAmountCannotBeMoreThanCapturedAmountError{}
-	}
-
+//Reverse - return the transaction amount against account balance
+func (a *Account) ReverseAuthorisedAmount(transaction *BlockedTransaction, amount float64) error {
 	if err := transaction.Reverse(amount); err != nil {
 		return errors.New("oops, transaction can not be reverse")
 	}
+
 	//topup the refunded amount
 	a.Topup(amount)
 

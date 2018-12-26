@@ -7,22 +7,24 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+//AccountRepositoryInterface - repository interface for account
 type AccountRepositoryInterface interface {
-	TopupAccount(account Account) (Account, error)
-	FindByAccountNumber(accountNumber int) (*Account, error)
+	FindByCardNumber(cardNumber string) (*Account, error)
+	UpdateAccount(account *Account) error
 }
 
+//AccountRepository - type for account repository
 type AccountRepository struct {
 	Db *gorm.DB
 }
 
-//FindByAccountNumber - returns account
-func (repo *AccountRepository) FindByAccountNumber(accountNumber int) (*Account, error) {
+//FindByCardNumber - returns account
+func (repo *AccountRepository) FindByCardNumber(cardNumber string) (*Account, error) {
 	var account Account
-	res := repo.Db.Find(&account, &Account{AccountNumber: accountNumber})
+	res := repo.Db.Find(&account, &Account{CardNumber: cardNumber})
 
 	if res.RecordNotFound() {
-		return &account, errors.New(fmt.Sprintf("account not found with account number : %d", accountNumber))
+		return &account, fmt.Errorf("Card details not found with card number : %s", cardNumber)
 	}
 
 	return &account, nil

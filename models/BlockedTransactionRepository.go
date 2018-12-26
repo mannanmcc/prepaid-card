@@ -9,13 +9,25 @@ import (
 
 //BlockedTransactionRepositoryInterface - interface for model BlockedTransactionRepository
 type BlockedTransactionRepositoryInterface interface {
-	TopupAccount(account Account) (Account, error)
-	FindByAccountNumber(accountNumber int) (*Account, error)
+	CreateBlockedTransaction(transaction BlockedTransaction) (BlockedTransaction, error)
+	FindByTransactionID(transationID string) (*BlockedTransaction, error)
+	Update(transaction *BlockedTransaction) error
 }
 
 //BlockedTransactionRepository - type BlockedTransactionRepository
 type BlockedTransactionRepository struct {
 	Db *gorm.DB
+}
+
+func (repo *BlockedTransactionRepository) FindAllBlockedTransactions(cardNumber string) []BlockedTransaction {
+	var blockedTransactions []BlockedTransaction
+	res := repo.Db.Find(&blockedTransactions, &BlockedTransaction{CardNumber: cardNumber, Status: STATUS_BLOCKED})
+
+	if res.RecordNotFound() {
+		return nil
+	}
+
+	return blockedTransactions
 }
 
 //CreateBlockedTransaction - record a block transaction
@@ -43,9 +55,8 @@ func (repo *BlockedTransactionRepository) FindByTransactionID(transationID strin
 
 //Update - update the blocked transaction
 func (repo *BlockedTransactionRepository) Update(transaction *BlockedTransaction) error {
-	fmt.Printf("%+v\n", transaction)
 	id := repo.Db.Save(&transaction)
-	if id != nil {
+	if id == nil {
 		return errors.New("block transaction saving failed")
 	}
 

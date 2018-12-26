@@ -12,14 +12,17 @@ const STATUS_REVERSED = "REVERSED"
 
 //todo - add following later on startDate
 type BlockedTransaction struct {
-	ID            int
-	AccountNumber int    `gorm:"column:account_number"`
-	TransactionID string `gorm:"column:transaction_id"`
-	Amount        float64
-	MerchantID    string
-	Reason        string
-	BlockedAt     time.Time `json:"BlockedAt" gorm:"column:blocked_at;type:datetime;default:CURRENT_TIMESTAMP"`
-	Status        string    `gorm:"column:status"`
+	ID                  int
+	CardNumber          string `gorm:"column:card_number"`
+	TransactionID       string `gorm:"column:transaction_id"`
+	ParentTransactionID string `gorm:"column:parent_transaction_id"`
+	Balance             float64
+	Amount              float64
+	MerchantID          string
+	Reason              string
+	BlockedAt           time.Time
+	UpdatedAt           time.Time
+	Status              string `gorm:"column:status"`
 }
 
 func (bt *BlockedTransaction) TableName() string {
@@ -42,18 +45,13 @@ func (a *CannotBlockAmount) Error() string {
 	return fmt.Sprintf("Cannot block amount: %f", a.Amount)
 }
 
-//Capture - check capture with blocked amount and decrease the blocked if success
+//CaptureFund - check capture with blocked amount and decrease the blocked if success
 func (bt *BlockedTransaction) CaptureFund(amount float64) error {
-	if bt.Amount < amount {
+	if bt.Balance < amount {
 		return errors.New("Cannot capture amount which is more than remaining blocked amount")
 	}
 
-	bt.Amount = bt.Amount - amount
-	//Changed status to captured if capturing full amount
-	if bt.Amount == amount {
-		bt.Status = STATUS_CAPTURED
-	}
-
+	bt.Balance = bt.Balance - amount
 	return nil
 }
 
@@ -63,8 +61,7 @@ func (bt *BlockedTransaction) Reverse(amount float64) error {
 		return errors.New("Cannot capture amount which is more than captured amount")
 	}
 
-	fmt.Printf("Cannot capture amount which is more than captured amount 1")
-	bt.Amount = bt.Amount - amount
+	bt.Balance = bt.Balance - amount
 	//Changed status to captured if capturing full amount
 	if bt.Amount == amount {
 		fmt.Printf("Cannot capture amount which is more than captured amount 2")
