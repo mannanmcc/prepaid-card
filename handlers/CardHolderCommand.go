@@ -27,7 +27,7 @@ func (command *CardHolderCommand) Toptup(topupRequest *TopupRequest, db *gorm.DB
 		return err
 	}
 
-	if account.Status != ACCOUNT_STATUS_ACTIVE {
+	if account.Status != AccountStatusInActive {
 		return errors.New("The account is inactive")
 	}
 

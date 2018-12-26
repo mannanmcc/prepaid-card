@@ -37,7 +37,7 @@ func (c *Command) AuthorisationCommand(authReq authorisationRequestBody, db *gor
 		MerchantID:    authReq.merchantId,
 		Reason:        authReq.reason,
 		BlockedAt:     time.Now(),
-		Status:        models.STATUS_BLOCKED,
+		Status:        models.StatusBlocked,
 	}
 
 	blockedTransactionRepo := models.BlockedTransactionRepository{Db: db}

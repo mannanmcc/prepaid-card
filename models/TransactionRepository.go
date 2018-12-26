@@ -31,7 +31,7 @@ func (repo *TransactionRepository) Create(transaction Transaction) (Transaction,
 //FindByTransactionId - find the block transaction by transaction id
 func (repo *TransactionRepository) FindByTransactionID(transationID string) (*Transaction, error) {
 	var transaction Transaction
-	res := repo.Db.Find(&transaction, &Transaction{TransactionID: transationID, Status: STATUS_CAPTURED})
+	res := repo.Db.Find(&transaction, &Transaction{TransactionID: transationID, Status: StatusCaptured})
 
 	if res.RecordNotFound() {
 		return nil, fmt.Errorf("No transaction found to refund with id: %s", transationID)

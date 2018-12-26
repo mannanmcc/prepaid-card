@@ -21,7 +21,7 @@ type BlockedTransactionRepository struct {
 
 func (repo *BlockedTransactionRepository) FindAllBlockedTransactions(cardNumber string) []BlockedTransaction {
 	var blockedTransactions []BlockedTransaction
-	res := repo.Db.Find(&blockedTransactions, &BlockedTransaction{CardNumber: cardNumber, Status: STATUS_BLOCKED})
+	res := repo.Db.Find(&blockedTransactions, &BlockedTransaction{CardNumber: cardNumber, Status: StatusBlocked})
 
 	if res.RecordNotFound() {
 		return nil
@@ -44,7 +44,7 @@ func (repo *BlockedTransactionRepository) CreateBlockedTransaction(transaction B
 //FindByTransactionId - find the block transaction by transaction id
 func (repo *BlockedTransactionRepository) FindByTransactionID(transationID string) (*BlockedTransaction, error) {
 	var blockedTransaction BlockedTransaction
-	res := repo.Db.Find(&blockedTransaction, &BlockedTransaction{TransactionID: transationID, Status: STATUS_BLOCKED})
+	res := repo.Db.Find(&blockedTransaction, &BlockedTransaction{TransactionID: transationID, Status: StatusBlocked})
 
 	if res.RecordNotFound() {
 		return nil, fmt.Errorf("No blocked transaction found to capture amount from with id: %s", transationID)

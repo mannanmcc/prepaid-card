@@ -15,7 +15,7 @@ func handleMerchantVerification(merchantID string, db *gorm.DB) error {
 		return fmt.Errorf("no merchant is found with merchant id: %s", merchantID)
 	}
 
-	if merchant.Status != models.MERCHANT_STATUS_ACTIVE {
+	if merchant.Status != models.MerchantStatusActive {
 		return fmt.Errorf("Merchant %s is not active", merchantID)
 	}
 

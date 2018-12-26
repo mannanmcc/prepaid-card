@@ -6,9 +6,9 @@ import (
 	"time"
 )
 
-const STATUS_BLOCKED = "BLOCKED"
-const STATUS_CAPTURED = "CAPTURED"
-const STATUS_REVERSED = "REVERSED"
+const StatusBlocked = "BLOCKED"
+const StatusCaptured = "CAPTURED"
+const StatusReversed = "REVERSED"
 
 //todo - add following later on startDate
 type BlockedTransaction struct {
@@ -63,7 +63,7 @@ func (bt *BlockedTransaction) Reverse(amount float64) error {
 
 	//Changed status to captured if capturing full amount
 	if bt.Balance == amount {
-		bt.Status = STATUS_CAPTURED
+		bt.Status = StatusReversed
 	}
 
 	bt.Balance = bt.Balance - amount

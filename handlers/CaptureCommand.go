@@ -38,7 +38,7 @@ func (c *CaptureCommand) CaptureFund(transactionReq *TransactionRequest, db *gor
 		MerchantID:           blockedTransaction.MerchantID,
 		Amount:               transactionReq.amount,
 		Balance:              transactionReq.amount,
-		Status:               models.STATUS_CAPTURED,
+		Status:               models.StatusCaptured,
 		CapturedAt:           time.Now(),
 	}
 

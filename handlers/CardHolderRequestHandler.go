@@ -73,14 +73,15 @@ func (env Env) CheckBalanceAndLoadedAmount(w http.ResponseWriter, r *http.Reques
 
 	accountDetails.BlockedFunds = make([]BlockedFund, 0)
 	for _, transaction := range transactions {
-		blockedFund := BlockedFund{
-			Amount:         transaction.Balance,
-			TransactionRef: transaction.TransactionID,
-			Reason:         transaction.Reason,
-			BlockedAt:      transaction.BlockedAt,
+		if transaction.Status == models.StatusBlocked && transaction.Balance > 0 {
+			blockedFund := BlockedFund{
+				Amount:         transaction.Balance,
+				TransactionRef: transaction.TransactionID,
+				Reason:         transaction.Reason,
+				BlockedAt:      transaction.BlockedAt,
+			}
+			accountDetails.BlockedFunds = append(accountDetails.BlockedFunds, blockedFund)
 		}
-
-		accountDetails.BlockedFunds = append(accountDetails.BlockedFunds, blockedFund)
 	}
 
 	topupRepo := models.TopupRepository{Db: env.Db}
