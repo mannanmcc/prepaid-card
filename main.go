@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	dbHost     = "192.168.33.10"
-	dbUser     = "user"
-	dbPassword = "password"
+	dbHost     = ""
+	dbUser     = ""
+	dbPassword = ""
 	dbName     = "prepaid-card"
 )
 
