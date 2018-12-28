@@ -8,6 +8,12 @@ import (
 	"github.com/mannanmcc/prepaid-card/models"
 )
 
+//CreateCardSuccessResponse - response structure for create new card
+type CreateCardSuccessResponse struct {
+	CardNumber string
+	Message    string
+}
+
 //AccountDetails - return structure type
 type AccountDetails struct {
 	CurrentBalance float64
@@ -53,6 +59,29 @@ func (env Env) TopupCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	JSONResponse("SUCCESS", "Your card has been top-up successfully", w)
+}
+
+// CreateNewCard - create a new card
+func (env Env) CreateNewCard(w http.ResponseWriter, r *http.Request) {
+	createCardRequest := &CreateCardRequest{}
+	if err := createCardRequest.Validate(r); err != nil {
+		HandleFailedResponse(err.Error(), w)
+		return
+	}
+
+	command := CardHolderCommand{}
+	account, err := command.CreateCard(createCardRequest, env.Db)
+	if err != nil {
+		HandleFailedResponse(err.Error(), w)
+		return
+	}
+
+	response := &CreateCardSuccessResponse{
+		CardNumber: account.CardNumber,
+		Message:    "Welcome!, new card has been created",
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
 // CheckBalanceAndLoadedAmount - handle add new company request

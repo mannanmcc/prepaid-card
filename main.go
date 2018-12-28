@@ -8,8 +8,15 @@ import (
 	"github.com/mannanmcc/prepaid-card/models"
 )
 
+const (
+	dbHost     = "192.168.33.10"
+	dbUser     = "user"
+	dbPassword = "password"
+	dbName     = "prepaid-card"
+)
+
 func main() {
-	db, err := models.NewDB("user:password@tcp(192.168.33.10:3306)/prepaid-card?charset=utf8&parseTime=True")
+	db, err := models.NewDB(dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":3306)/" + dbName + "?charset=utf8&parseTime=True")
 	if err != nil {
 		panic(err)
 	}

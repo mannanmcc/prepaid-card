@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type ValidatorInterface interface {
@@ -97,6 +98,49 @@ func (topup *TopupRequest) Validate(r *http.Request) error {
 		return errors.New("Parameter `amount` must be provided`")
 	}
 	topup.amount = amount
+
+	return nil
+}
+
+//CreateCardRequest - input structure for create card request
+type CreateCardRequest struct {
+	fullName    string
+	address     string
+	postcode    string
+	dateOfBirth time.Time
+}
+
+//Validate - validate Topup request
+func (createCardRequest *CreateCardRequest) Validate(r *http.Request) error {
+	address := r.FormValue("address")
+	fullName := r.FormValue("fullName")
+	postcode := r.FormValue("postcode")
+	dateOfBirth := r.FormValue("dateOfBirth")
+
+	if address == "" {
+		return errors.New("Parameter `address` must be provided`")
+	}
+	createCardRequest.address = address
+
+	if postcode == "" {
+		return errors.New("Parameter `postcode` must be provided`")
+	}
+	createCardRequest.postcode = postcode
+
+	if fullName == "" {
+		return errors.New("Parameter `fullName` must be provided`")
+	}
+	createCardRequest.fullName = fullName
+
+	if dateOfBirth == "" {
+		return errors.New("Parameter `dateOfBirth` must be provided`")
+	}
+
+	dob, err := time.Parse("02/01/2006", dateOfBirth)
+	if err != nil {
+		return errors.New("Parameter date of birth must be provided with format `DD/MM/YY`")
+	}
+	createCardRequest.dateOfBirth = dob
 
 	return nil
 }

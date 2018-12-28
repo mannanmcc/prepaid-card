@@ -51,6 +51,7 @@ func (env Env) ReverseCapture(w http.ResponseWriter, r *http.Request) {
 		HandleFailedResponse(err.Error(), w)
 		return
 	}
+
 	JSONResponse("SUCCESS", fmt.Sprintf("The transaction with ref %s is reversed and can not be charge back to the card", transReq.transactionId), w)
 }
 

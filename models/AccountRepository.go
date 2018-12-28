@@ -11,6 +11,7 @@ import (
 type AccountRepositoryInterface interface {
 	FindByCardNumber(cardNumber string) (*Account, error)
 	Update(account *Account) error
+	Create(account Account)
 }
 
 //AccountRepository - type for account repository
@@ -24,9 +25,8 @@ func (repo *AccountRepository) FindByCardNumber(cardNumber string) (*Account, er
 	res := repo.Db.Find(&account, &Account{CardNumber: cardNumber})
 
 	if res.RecordNotFound() {
-		return &account, fmt.Errorf("Card details not found with card number : %s", cardNumber)
+		return &account, fmt.Errorf("Card details not found with card number : %d", cardNumber)
 	}
-
 	return &account, nil
 }
 
@@ -37,6 +37,10 @@ func (repo *AccountRepository) Update(account *Account) error {
 	if id == nil {
 		return errors.New("account saving failed")
 	}
-
 	return nil
+}
+
+//Create - create a new account
+func (repo *AccountRepository) Create(account *Account) {
+	repo.Db.Save(account)
 }

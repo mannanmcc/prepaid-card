@@ -3,6 +3,13 @@ package models
 import (
 	"errors"
 	"fmt"
+	"time"
+)
+
+const (
+	AccountStatusInActive = "INACTIVE"
+	AccountStatusActive   = "ACTIVE"
+	AccountStatusDisabled = "DISABLED"
 )
 
 //todo - add following later on startDate
@@ -11,8 +18,11 @@ type Account struct {
 	Balance           float64
 	AccountHolderName string
 	CardNumber        string
-	SortCode          string
+	SortCode          int
 	Status            string
+	Address           string
+	Postcode          string
+	DateOfBirth       time.Time
 }
 
 func (account *Account) TableName() string {
