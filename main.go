@@ -26,6 +26,5 @@ func main() {
 	env := handlers.Env{Db: db}
 	router := NewRouter(env)
 
-	//log.Fatal(http.ListenAndServeTLS(":8080", "server.crt", "server.key", router))
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
