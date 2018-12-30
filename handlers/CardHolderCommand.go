@@ -17,15 +17,14 @@ const (
 
 //CardHolderCommandInterface - list of required command for each type transaction
 type CardHolderCommandInterface interface {
-	TopupCommand(TopupRequest, *gorm.DB) error
-	CreditCard(CreatCardRequest *gorm.DB) error
+	topupCommand(TopupRequest, *gorm.DB) error
+	creditCard(CreatCardRequest *gorm.DB) error
 }
 
 //CardHolderCommand - command type for card holder
 type CardHolderCommand struct{}
 
-//Toptup - toptup the card
-func (command *CardHolderCommand) Toptup(topupRequest *TopupRequest, db *gorm.DB) error {
+func (command *CardHolderCommand) toptup(topupRequest *TopupRequest, db *gorm.DB) error {
 	if topupRequest.amount < 0 {
 		return errors.New("Negative number can not used for topup")
 	}
@@ -64,8 +63,7 @@ func generateUniqueRandomNumber(min, max int, db *gorm.DB) string {
 	return generatedCardNumber
 }
 
-//CreateCard - create a new card
-func (command *CardHolderCommand) CreateCard(createCardRequest *CreateCardRequest, db *gorm.DB) (models.Account, error) {
+func (command *CardHolderCommand) createCard(createCardRequest *CreateCardRequest, db *gorm.DB) (models.Account, error) {
 	newCardNumber := generateUniqueRandomNumber(cardNumberMin, cardNumberMax, db)
 	account := models.Account{
 		CardNumber:        newCardNumber,

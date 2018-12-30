@@ -9,14 +9,13 @@ import (
 
 //Command - list of required command for each type transaction
 type CommandInterface interface {
-	AuthorisationCommand(data []string, env Env) ([]string, error)
-	CaptureFundCommand(data []string, env Env) ([]string, error)
+	authorisationCommand(authReq authorisationRequestBody, db *gorm.DB) error
+	reverseCommand(transactionReq *TransactionRequest, db *gorm.DB) error
 }
 
 type Command struct{}
 
-//AuthorisationCommand - authorise the payment
-func (c *Command) AuthorisationCommand(authReq authorisationRequestBody, db *gorm.DB) error {
+func (c *Command) authorisationCommand(authReq authorisationRequestBody, db *gorm.DB) error {
 	accountRepo := models.AccountRepository{Db: db}
 	account, err := accountRepo.FindByCardNumber(authReq.cardNumber)
 	if err != nil {
@@ -52,8 +51,7 @@ func (c *Command) AuthorisationCommand(authReq authorisationRequestBody, db *gor
 	return nil
 }
 
-//ReverseCommand - reverse the capture
-func (c *Command) ReverseCommand(transactionReq *TransactionRequest, db *gorm.DB) error {
+func (c *Command) reverseCommand(transactionReq *TransactionRequest, db *gorm.DB) error {
 	transactionRepo := models.BlockedTransactionRepository{Db: db}
 	transaction, err := transactionRepo.FindByTransactionID(transactionReq.transactionId)
 	if err != nil {

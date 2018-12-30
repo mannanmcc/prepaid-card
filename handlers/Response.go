@@ -29,17 +29,17 @@ func JSONResponseWithTransaction(transactionId string, status string, msg string
 	json.NewEncoder(w).Encode(response)
 }
 
-//JSONResponse builds up the response object and encode
-func JSONResponse(status string, msg string, w http.ResponseWriter) {
+//JSONResponse builds up the success response object and send
+func handleSuccessResponse(msg string, w http.ResponseWriter) {
 	response := Response{
-		Status:  status,
+		Status:  "SUCCESS",
 		Message: msg,
 	}
 
 	json.NewEncoder(w).Encode(response)
 }
 
-func HandleFailedResponse(msg string, w http.ResponseWriter) {
+func handleFailedResponse(msg string, w http.ResponseWriter) {
 	response := Response{
 		Status:  "FAILED",
 		Message: msg,

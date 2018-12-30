@@ -37,12 +37,12 @@ type RecentTopup struct {
 func (env Env) TopupCard(w http.ResponseWriter, r *http.Request) {
 	topupRequest := &TopupRequest{}
 	if err := topupRequest.Validate(r); err != nil {
-		HandleFailedResponse(err.Error(), w)
+		handleFailedResponse(err.Error(), w)
 		return
 	}
 	command := CardHolderCommand{}
-	if err := command.Toptup(topupRequest, env.Db); err != nil {
-		HandleFailedResponse(err.Error(), w)
+	if err := command.toptup(topupRequest, env.Db); err != nil {
+		handleFailedResponse(err.Error(), w)
 		return
 	}
 
@@ -54,25 +54,25 @@ func (env Env) TopupCard(w http.ResponseWriter, r *http.Request) {
 
 	topupRepo := models.TopupRepository{Db: env.Db}
 	if err := topupRepo.Store(topup); err != nil {
-		HandleFailedResponse(err.Error(), w)
+		handleFailedResponse(err.Error(), w)
 		return
 	}
 
-	JSONResponse("SUCCESS", "Your card has been top-up successfully", w)
+	handleSuccessResponse("Your card has been top-up successfully", w)
 }
 
 // CreateNewCard - create a new card
 func (env Env) CreateNewCard(w http.ResponseWriter, r *http.Request) {
 	createCardRequest := &CreateCardRequest{}
 	if err := createCardRequest.Validate(r); err != nil {
-		HandleFailedResponse(err.Error(), w)
+		handleFailedResponse(err.Error(), w)
 		return
 	}
 
 	command := CardHolderCommand{}
-	account, err := command.CreateCard(createCardRequest, env.Db)
+	account, err := command.createCard(createCardRequest, env.Db)
 	if err != nil {
-		HandleFailedResponse(err.Error(), w)
+		handleFailedResponse(err.Error(), w)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (env Env) CheckBalanceAndLoadedAmount(w http.ResponseWriter, r *http.Reques
 	accountRepo := models.AccountRepository{Db: env.Db}
 	account, err := accountRepo.FindByCardNumber(cardNumber)
 	if err != nil {
-		HandleFailedResponse(err.Error(), w)
+		handleFailedResponse(err.Error(), w)
 	}
 
 	blockedTransRepo := models.BlockedTransactionRepository{Db: env.Db}

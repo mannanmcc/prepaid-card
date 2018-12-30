@@ -9,14 +9,13 @@ import (
 
 //Command - list of required command for each type transaction
 type CapturedCommandInterface interface {
-	CaptureFundCommand(data []string, env Env) ([]string, error)
-	RefundCommand(data []string, env Env) ([]string, error)
+	captureFund(transactionReq *TransactionRequest, db *gorm.DB) error
+	refund(refundReq *TransactionRequest, db *gorm.DB) error
 }
 
 type CaptureCommand struct{}
 
-//CaptureFund - capture blocked
-func (c *CaptureCommand) CaptureFund(transactionReq *TransactionRequest, db *gorm.DB) error {
+func (c *CaptureCommand) captureFund(transactionReq *TransactionRequest, db *gorm.DB) error {
 	blockTransactionRepo := models.BlockedTransactionRepository{Db: db}
 	blockedTransaction, err := blockTransactionRepo.FindByTransactionID(transactionReq.transactionId)
 	if err != nil {
@@ -53,8 +52,7 @@ func (c *CaptureCommand) CaptureFund(transactionReq *TransactionRequest, db *gor
 	return nil
 }
 
-//Refund - refund the captured fund
-func (c *CaptureCommand) Refund(refundReq *TransactionRequest, db *gorm.DB) error {
+func (c *CaptureCommand) refund(refundReq *TransactionRequest, db *gorm.DB) error {
 	transactionRepo := models.TransactionRepository{Db: db}
 	transaction, err := transactionRepo.FindByTransactionID(refundReq.transactionId)
 	if err != nil {
@@ -73,7 +71,6 @@ func (c *CaptureCommand) Refund(refundReq *TransactionRequest, db *gorm.DB) erro
 
 	account.Topup(refundReq.amount)
 
-	//update the account
 	if err := accountRepo.Update(account); err != nil {
 		return err
 	}
