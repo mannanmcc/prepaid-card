@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	dbHost     = ""
-	dbUser     = ""
-	dbPassword = ""
-	dbName     = "prepaid-card"
+	dbHost     = "localhost"
+	dbUser     = "root"
+	dbPassword = "password"
+	dbName     = "card"
 )
 
 func main() {
