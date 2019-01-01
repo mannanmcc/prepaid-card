@@ -23,6 +23,7 @@ func (env Env) AuthoriseToCharge(w http.ResponseWriter, r *http.Request) {
 	command := Command{}
 	if err := command.authorisationCommand(authorisationRequest, env.Db); err != nil {
 		handleFailedResponse(err.Error(), w)
+		return
 	}
 
 	handleSuccessResponse("This authorisation request is approved.", w)

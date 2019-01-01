@@ -1,7 +1,7 @@
 package models
 
 type Merchant struct {
-	ID         int
+	ID         int `gorm:"primary_key"`
 	MerchantID string
 	Status     string
 }

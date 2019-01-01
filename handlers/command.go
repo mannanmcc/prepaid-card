@@ -39,16 +39,19 @@ func (c *Command) authorisationCommand(authReq authorisationRequestBody, db *gor
 		Status:        models.StatusBlocked,
 	}
 
-	blockedTransactionRepo := models.BlockedTransactionRepository{Db: db}
-	if _, err = blockedTransactionRepo.CreateBlockedTransaction(blockTransaction); err != nil {
-		return err
-	}
+	err = models.DoInTransaction(
+		func(tx *gorm.DB) error {
+			return tx.Create(&blockTransaction).Error
+		},
+		func(tx *gorm.DB) error {
+			return tx.Table("account").Where("id = ?", account.ID).Updates(map[string]interface{}{
+				"balance": account.Balance,
+			}).Error
+		},
+		db,
+	)
 
-	if err := accountRepo.Update(account); err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (c *Command) reverseCommand(transactionReq *TransactionRequest, db *gorm.DB) error {
@@ -70,13 +73,20 @@ func (c *Command) reverseCommand(transactionReq *TransactionRequest, db *gorm.DB
 
 	account.Topup(transactionReq.amount)
 
-	if err := accountRepo.Update(account); err != nil {
-		return err
-	}
+	err = models.DoInTransaction(
+		func(tx *gorm.DB) error {
+			//use interface instead of model to get working with zero value update
+			return tx.Table("blocked_transactions").Where("transaction_id = ?", transactionReq.transactionId).Updates(map[string]interface{}{
+				"balance": transaction.Balance,
+			}).Error
+		},
+		func(tx *gorm.DB) error {
+			return tx.Table("account").Where("id = ?", account.ID).Update(map[string]interface{}{
+				"balance": account.Balance,
+			}).Error
+		},
+		db,
+	)
 
-	if err := transactionRepo.Update(transaction); err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

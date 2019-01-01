@@ -12,7 +12,7 @@ const StatusReversed = "REVERSED"
 
 //todo - add following later on startDate
 type BlockedTransaction struct {
-	ID                  int
+	ID                  int    `gorm:"primary_key"`
 	CardNumber          string `gorm:"column:card_number"`
 	TransactionID       string `gorm:"column:transaction_id"`
 	ParentTransactionID string `gorm:"column:parent_transaction_id"`

@@ -14,7 +14,7 @@ const (
 
 //todo - add following later on startDate
 type Account struct {
-	ID                int
+	ID                int `gorm:"primary_key"`
 	Balance           float64
 	AccountHolderName string
 	CardNumber        string

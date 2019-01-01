@@ -28,8 +28,6 @@ func (c *CaptureCommand) captureFund(transactionReq *TransactionRequest, db *gor
 	}
 
 	transactionID := models.GenerateTransactionId(RANDOM_KEY_LENGTH)
-	transactionRepo := models.TransactionRepository{Db: db}
-	//create a transaction based on blocked transaction
 	transaction := models.Transaction{
 		CardNumber:           blockedTransaction.CardNumber,
 		TransactionID:        transactionID,
@@ -41,15 +39,20 @@ func (c *CaptureCommand) captureFund(transactionReq *TransactionRequest, db *gor
 		CapturedAt:           time.Now(),
 	}
 
-	if _, err := transactionRepo.Create(transaction); err != nil {
-		return err
-	}
+	err = models.DoInTransaction(
+		func(tx *gorm.DB) error {
+			return tx.Create(&transaction).Error
+		},
+		func(tx *gorm.DB) error {
+			return tx.Table("blocked_transactions").Where("id = ?", blockedTransaction.ID).Updates(map[string]interface{}{
+				"balance": blockedTransaction.Balance,
+			}).Error
 
-	if err := blockTransactionRepo.Update(blockedTransaction); err != nil {
-		return err
-	}
+		},
+		db,
+	)
 
-	return nil
+	return err
 }
 
 func (c *CaptureCommand) refund(refundReq *TransactionRequest, db *gorm.DB) error {
@@ -70,11 +73,20 @@ func (c *CaptureCommand) refund(refundReq *TransactionRequest, db *gorm.DB) erro
 	}
 
 	account.Topup(refundReq.amount)
+	err = models.DoInTransaction(
+		func(tx *gorm.DB) error {
+			//use interface instead of model to get working with zero value update
+			return tx.Table("transactions").Where("id = ?", transaction.ID).Updates(map[string]interface{}{
+				"balance": transaction.Balance,
+			}).Error
+		},
+		func(tx *gorm.DB) error {
+			return tx.Table("account").Where("id = ?", account.ID).Update(map[string]interface{}{
+				"balance": account.Balance,
+			}).Error
+		},
+		db,
+	)
 
-	if err := accountRepo.Update(account); err != nil {
-		return err
-	}
-
-	err = transactionRepo.Update(transaction)
 	return err
 }

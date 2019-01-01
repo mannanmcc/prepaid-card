@@ -7,7 +7,7 @@ import (
 
 //Transaction - represent the transaction which is captured from reserved
 type Transaction struct {
-	ID                   int
+	ID                   int `gorm:"primary_key"`
 	CardNumber           string
 	BlockedTransactionID string
 	TransactionID        string
